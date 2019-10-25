@@ -1039,7 +1039,7 @@ bool blk_mq_get_driver_tag(struct request *rq)
 	bool shared;
 
 	if (rq->tag != -1)
-		goto done;
+		return true;
 
 	if (blk_mq_tag_is_reserved(data.hctx->sched_tags, rq->internal_tag))
 		data.flags |= BLK_MQ_REQ_RESERVED;
@@ -1054,7 +1054,6 @@ bool blk_mq_get_driver_tag(struct request *rq)
 		data.hctx->tags->rqs[rq->tag] = rq;
 	}
 
-done:
 	return rq->tag != -1;
 }
 
