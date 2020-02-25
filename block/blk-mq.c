@@ -1904,8 +1904,7 @@ insert:
 	if (bypass_insert)
 		return BLK_STS_RESOURCE;
 
-	blk_mq_sched_insert_request(rq, false, run_queue, false);
-
+	blk_mq_request_bypass_insert(rq, false, run_queue);
 	return BLK_STS_OK;
 }
 
