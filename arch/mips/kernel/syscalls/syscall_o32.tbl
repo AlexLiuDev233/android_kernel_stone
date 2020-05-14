@@ -423,3 +423,7 @@
 433	o32	fspick				sys_fspick
 434	o32	pidfd_open			sys_pidfd_open
 435	o32	clone3				__sys_clone3
+# 436 reserved for close_range
+# 437 reserved for openat2
+# 438 reserved for pidfd_getfd
+439	o32	faccessat2			sys_faccessat2

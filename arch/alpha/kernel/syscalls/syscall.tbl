@@ -478,5 +478,5 @@
 # 546 reserved for close_range
 # 547 reserved for openat2
 # 548 reserved for pidfd_getfd
-# 549 reserved for faccessat2
+549     common  faccessat2                      sys_faccessat2
 550	common	process_madvise			sys_process_madvise
