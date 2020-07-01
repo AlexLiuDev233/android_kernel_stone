@@ -239,7 +239,6 @@ struct raid_set {
 
 	struct mddev md;
 	struct raid_type *raid_type;
-	struct dm_target_callbacks callbacks;
 
 	/* Optional raid4/5/6 journal device */
 	struct journal_dev {
@@ -1720,13 +1719,6 @@ static void do_table_event(struct work_struct *ws)
 		rs_set_capacity(rs);
 	}
 	dm_table_event(rs->ti->table);
-}
-
-static int raid_is_congested(struct dm_target_callbacks *cb, int bits)
-{
-	struct raid_set *rs = container_of(cb, struct raid_set, callbacks);
-
-	return mddev_congested(&rs->md, bits);
 }
 
 /*
@@ -3265,9 +3257,6 @@ static int raid_ctr(struct dm_target *ti, unsigned int argc, char **argv)
 		goto bad_md_start;
 	}
 
-	rs->callbacks.congested_fn = raid_is_congested;
-	dm_table_add_target_callbacks(ti->table, &rs->callbacks);
-
 	/* If raid4/5/6 journal mode explicitly requested (only possible with journal dev) -> set it */
 	if (test_bit(__CTR_FLAG_JOURNAL_MODE, &rs->ctr_flags)) {
 		r = r5c_journal_mode_set(&rs->md, rs->journal_dev.mode);
@@ -3332,7 +3321,6 @@ static void raid_dtr(struct dm_target *ti)
 {
 	struct raid_set *rs = ti->private;
 
-	list_del_init(&rs->callbacks.list);
 	md_stop(&rs->md);
 	raid_set_free(rs);
 }
