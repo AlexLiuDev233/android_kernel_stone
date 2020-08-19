@@ -9,4 +9,5 @@ obj-$(CONFIG_VIRTIO_FS) += virtiofs.o
 
 fuse-objs := dev.o dir.o file.o inode.o control.o xattr.o acl.o readdir.o
 fuse-objs += passthrough.o
+fuse-$(CONFIG_FUSE_DAX) += dax.o
 virtiofs-y += virtio_fs.o
