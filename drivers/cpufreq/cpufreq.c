@@ -31,6 +31,7 @@
 #include <linux/tick.h>
 #include <linux/sched/sysctl.h>
 #include <trace/events/power.h>
+#include <trace/hooks/cpufreq.h>
 
 static LIST_HEAD(cpufreq_policy_list);
 
@@ -712,6 +713,8 @@ static bool should_use_cached_freq(int cpu)
 static ssize_t show_cpuinfo_max_freq(struct cpufreq_policy *policy, char *buf)
 {
 	unsigned int freq = policy->cpuinfo.max_freq;
+
+	trace_android_vh_show_max_freq(policy, &freq);
 
 	if (should_use_cached_freq(policy->cpu))
 		freq = cpuinfo_max_freq_cached << 1;

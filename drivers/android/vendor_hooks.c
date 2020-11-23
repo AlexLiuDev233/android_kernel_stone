@@ -22,6 +22,10 @@
 #include <trace/hooks/sysrqcrash.h>
 #include <trace/hooks/cgroup.h>
 #include <trace/hooks/sys.h>
+#include <trace/hooks/printk.h>
+#include <trace/hooks/gic_v3.h>
+#include <trace/hooks/epoch.h>
+#include <trace/hooks/cpufreq.h>
 
 /*
  * Export tracepoints that act as a bare tracehook (ie: have no trace event
@@ -73,3 +77,12 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_map_util_freq);
 EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_em_pd_energy);
 EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_cgroup_set_task);
 EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_syscall_prctl_finished);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_dump_throttled_rt_tasks);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_printk_hotplug);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_jiffies_update);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_gic_v3_set_affinity);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_gic_v3_affinity_init);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_show_suspend_epoch_val);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_show_resume_epoch_val);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_show_max_freq);
+EXPORT_TRACEPOINT_SYMBOL_GPL(android_vh_freq_table_limits);
