@@ -395,6 +395,7 @@ static void cpufreq_notify_transition(struct cpufreq_policy *policy,
 		cpufreq_stats_record_transition(policy, freqs->new);
 		cpufreq_times_record_transition(policy, freqs->new);
 		policy->cur = freqs->new;
+		trace_android_rvh_cpufreq_transition(policy);
 	}
 }
 
@@ -2107,6 +2108,7 @@ unsigned int cpufreq_driver_fast_switch(struct cpufreq_policy *policy,
 	if (ret) {
 		cpufreq_times_record_transition(policy, ret);
 		cpufreq_stats_record_transition(policy, ret);
+		trace_android_rvh_cpufreq_transition(policy);
 	}
 
 	return ret;
