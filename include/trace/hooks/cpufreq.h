@@ -23,8 +23,8 @@ DECLARE_HOOK(android_vh_freq_table_limits,
 	TP_ARGS(policy, min_freq, max_freq));
 #else
 
-#define trace_android_vh_show_max_freq(policy, max_freq)
-#define trace_android_vh_freq_table_limits(policy, min_freq, max_freq)
+#define trace_android_rvh_show_max_freq(policy, max_freq)
+#define trace_android_rvh_freq_table_limits(policy, min_freq, max_freq)
 
 #endif
 

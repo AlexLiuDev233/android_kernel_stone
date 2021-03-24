@@ -1431,7 +1431,7 @@ static inline void enqueue_task(struct rq *rq, struct task_struct *p, int flags)
 	walt_update_last_enqueue(p);
 	trace_sched_enq_deq_task(p, 1, cpumask_bits(&p->cpus_mask)[0]);
 
-	trace_android_rvh_enqueue_task(rq, p);
+	trace_android_rvh_after_enqueue_task(rq, p);
 }
 
 static inline void dequeue_task(struct rq *rq, struct task_struct *p, int flags)
@@ -1452,7 +1452,7 @@ static inline void dequeue_task(struct rq *rq, struct task_struct *p, int flags)
 #endif
 	trace_sched_enq_deq_task(p, 0, cpumask_bits(&p->cpus_mask)[0]);
 
-	trace_android_rvh_dequeue_task(rq, p);
+	trace_android_rvh_after_dequeue_task(rq, p);
 }
 
 void activate_task(struct rq *rq, struct task_struct *p, int flags)
