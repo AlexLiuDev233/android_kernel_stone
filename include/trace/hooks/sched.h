@@ -82,6 +82,10 @@ DECLARE_HOOK(android_vh_em_pd_energy,
 		unsigned long *energy),
 	TP_ARGS(pd, max_util, sum_util, energy));
 
+DECLARE_HOOK(android_vh_dup_task_struct,
+	TP_PROTO(struct task_struct *tsk, struct task_struct *orig),
+	TP_ARGS(tsk, orig));
+
 /* macro versions of hooks are no longer required */
 
 #endif /* _TRACE_HOOK_SCHED_H */
