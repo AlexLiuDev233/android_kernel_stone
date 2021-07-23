@@ -13,9 +13,9 @@
 
 #if defined(CONFIG_TRACEPOINTS) && defined(CONFIG_ANDROID_VENDOR_HOOKS)
 
-DECLARE_HOOK(android_vh_show_max_freq,
+DECLARE_RESTRICTED_HOOK(android_rvh_show_max_freq,
 	TP_PROTO(struct cpufreq_policy *policy, unsigned int *max_freq),
-	TP_ARGS(policy, max_freq));
+	TP_ARGS(policy, max_freq), 1);
 
 DECLARE_HOOK(android_vh_freq_table_limits,
 	TP_PROTO(struct cpufreq_policy *policy, unsigned int min_freq,
