@@ -38,6 +38,7 @@
 #define __zalloc_auto(size) \
 	kzalloc(size, __can_sleep() ? GFP_KERNEL : GFP_ATOMIC)
 
+#undef __free
 #define __free(ptr) kfree(ptr)
 
 #define __alloc_size(ptr) ksize(ptr)
