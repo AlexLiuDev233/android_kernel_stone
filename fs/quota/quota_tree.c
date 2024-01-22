@@ -52,7 +52,7 @@ static int qtree_dqstr_in_blk(struct qtree_mem_dqinfo *info)
 	char *buf; \
 	char buf_onstack[STACK_ALLOC_SIZE] __aligned(8); \
 	if (unlikely(size > STACK_ALLOC_SIZE)) { \
-		buf = kmalloc(size, GFP_NOFS); \
+		buf = kmalloc(size, GFP_KERNEL); \
 		if (!buf) \
 			printk(KERN_WARNING "VFS: Not enough memory for quota buffers.\n"); \
 	} else { \
@@ -61,7 +61,7 @@ static int qtree_dqstr_in_blk(struct qtree_mem_dqinfo *info)
 
 #define __GETDQBUF(size) \
 	if (unlikely(size > STACK_ALLOC_SIZE)) { \
-		buf = kmalloc(size, GFP_NOFS); \
+		buf = kmalloc(size, GFP_KERNEL); \
 		if (!buf) { \
 			printk(KERN_WARNING "VFS: Not enough memory for quota buffers.\n"); \
 			return -ENOMEM; \
