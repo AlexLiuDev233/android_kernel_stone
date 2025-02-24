@@ -134,12 +134,6 @@ int vfs_getattr(const struct path *path, struct kstat *stat,
 {
 	int retval;
 
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	if (susfs_sus_path_by_path(path, &retval, SYSCALL_FAMILY_ALL_ENOENT)) {
-		return retval;
-	}
-#endif
-
 	retval = security_inode_getattr(path);
 	if (retval)
 		return retval;
