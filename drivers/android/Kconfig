@@ -98,6 +98,16 @@ config ANDROID_VENDOR_OEM_DATA
 
 	  If even slightly unsure, say Y.
 
+config ANDROID_REKERNEL
+	  bool "Re:Kernel kernel netlink"
+	  default y
+	  help
+		This is a helper kernel module, to append support for Android tombstones
+		This module use netlink. so this option will create /proc/rekernel directory.
+
+		If even slightly unsure, say Y.
+  
+
 endif # if ANDROID
 
 endmenu
