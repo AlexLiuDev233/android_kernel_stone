@@ -14,6 +14,7 @@
 #include <linux/fdtable.h>
 #include <linux/statfs.h>
 #include <linux/susfs.h>
+#include <linux/string.h>
 #include "mount.h"
 
 static spinlock_t susfs_spin_lock;
@@ -188,6 +189,16 @@ int susfs_add_sus_mount(struct st_susfs_sus_mount* __user user_info) {
 		SUSFS_LOGE("failed copying from userspace\n");
 		return 1;
 	}
+	
+	if (unlikely(strstarts(info.target_pathname, "/system"))) { // if umount target is system or system_ext, just ignore it!
+		SUSFS_LOGI("skip umount for '%s'", info.target_pathname);
+		return 0;
+	}
+
+	if (unlikely(strstarts(info.target_pathname, "/apex/com.android.conscrypt/cacerts"))) { // if umount target is cacert, just ignore it!
+		SUSFS_LOGI("skip umount for '%s'", info.target_pathname);
+		return 0;
+	}
 
 #if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
 #ifdef CONFIG_MIPS
@@ -234,6 +245,16 @@ int susfs_auto_add_sus_bind_mount(const char *pathname, struct path *path_target
 	struct mount *mnt;
 	struct inode *inode;
 
+	if (unlikely(strstarts(pathname, "/system"))) { // if umount target is system or system_ext, just ignore it!
+		SUSFS_LOGI("skip umount for '%s'", pathname);
+		return 0;
+	}
+
+	if (unlikely(strstarts(pathname, "/apex/com.android.conscrypt/cacerts"))) { // if umount target is cacert, just ignore it!
+		SUSFS_LOGI("skip umount for '%s'", pathname);
+		return 0;
+	}
+
 	mnt = real_mount(path_target->mnt);
 	if (mnt->mnt_group_id > 0 && // 0 means no peer group
 		mnt->mnt_group_id < DEFAULT_SUS_MNT_GROUP_ID) {
@@ -270,6 +291,16 @@ void susfs_auto_add_sus_ksu_default_mount(const char __user *to_pathname) {
 		goto out_free_pathname;
 		return;
 	}
+	if (unlikely(strstarts(pathname, "/system"))) { // if umount target is system or system_ext, just ignore it!
+		SUSFS_LOGI("skip umount for '%s'", pathname);
+		goto out_free_pathname;
+	}
+
+	if (unlikely(strstarts(pathname, "/apex/com.android.conscrypt/cacerts"))) { // if umount target is cacert, just ignore it!
+		SUSFS_LOGI("skip umount for '%s'", pathname);
+		goto out_free_pathname;
+	}
+	
 	if ((!strncmp(pathname, "/data/adb/modules", 17) ||
 		 !strncmp(pathname, "/debug_ramdisk", 14) ||
 		 !strncmp(pathname, "/system", 7) ||
@@ -561,14 +592,23 @@ void susfs_try_umount(uid_t target_uid) {
 
 	// We should umount in reversed order
 	list_for_each_entry_reverse(cursor, &LH_TRY_UMOUNT_PATH, list) {
-		if (cursor->info.mnt_mode == TRY_UMOUNT_DEFAULT) {
-			ksu_try_umount(cursor->info.target_pathname, false, 0, target_uid);
-		} else if (cursor->info.mnt_mode == TRY_UMOUNT_DETACH) {
-			ksu_try_umount(cursor->info.target_pathname, false, MNT_DETACH, target_uid);
-		} else {
-			SUSFS_LOGE("failed umounting '%s' for uid: %d, mnt_mode '%d' not supported\n",
-							cursor->info.target_pathname, target_uid, cursor->info.mnt_mode);
+		if (strstarts(cursor->info.target_pathname, "/system")) { // if umount target is system or system_ext, just ignore it!
+			pr_warn("susfs: force skip umount for '%s', because detected registered system umount!", cursor->info.target_pathname);
+		} 
+		else if (strstarts(cursor->info.target_pathname,"/apex/com.android.conscrypt/cacerts")) {// if umout target is cacerts, just ignore it!
+			pr_warn("susfs: force skip umount for '%s', because detected registered cacert umount!", cursor->info.target_pathname);
 		}
+		else {
+			if (cursor->info.mnt_mode == TRY_UMOUNT_DEFAULT) {
+				ksu_try_umount(cursor->info.target_pathname, false, 0, target_uid);
+			} else if (cursor->info.mnt_mode == TRY_UMOUNT_DETACH) {
+				ksu_try_umount(cursor->info.target_pathname, false, MNT_DETACH, target_uid);
+			} else {
+				SUSFS_LOGE("failed umounting '%s' for uid: %d, mnt_mode '%d' not supported\n",
+								cursor->info.target_pathname, target_uid, cursor->info.mnt_mode);
+			}
+		}
+		
 	}
 }
 
@@ -597,6 +637,15 @@ void susfs_auto_add_try_umount_for_bind_mount(struct path *path) {
 	dpath = d_path(path, pathname, PAGE_SIZE);
 	if (!dpath) {
 		SUSFS_LOGE("dpath is NULL\n");
+		goto out_free_pathname;
+	}
+	if (unlikely(strstarts(path, "/system"))) { // if umount target is system or system_ext, just ignore it!
+		SUSFS_LOGI("skip umount for '%s'", pathname);
+		goto out_free_pathname;
+	}
+	
+	if (unlikely(strstarts(path, "/apex/com.android.conscrypt/cacerts"))) { // if umount target is cacert, just ignore it!
+		SUSFS_LOGI("skip umount for '%s'", pathname);
 		goto out_free_pathname;
 	}
 
