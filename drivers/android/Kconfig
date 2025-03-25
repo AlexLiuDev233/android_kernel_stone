@@ -98,6 +98,14 @@ config ANDROID_VENDOR_OEM_DATA
 
 	  If even slightly unsure, say Y.
 
+config ANDROID_REKERNEL
+	bool "Android Rekernel netlink driver"
+	default y
+	depends on ANDROID_BINDER_IPC
+	help
+	  This option enables Rekernel enable status, 
+	  Rekernel is a Android tombstone kernel helper driver.
+
 endif # if ANDROID
 
 endmenu
