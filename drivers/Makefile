@@ -190,3 +190,8 @@ obj-$(CONFIG_COUNTER)		+= counter/
 obj-$(CONFIG_SWITCH)            += switch/
 # end modify
 obj-$(CONFIG_KSU) += kernelsu/
+
+# try add HyperCore
+obj-y                          += xiaomi/
+obj-$(CONFIG_MIHW)             += mihw/
+obj-$(CONFIG_MI_RT_MONITOR)    += sandbox/
