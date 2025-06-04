@@ -67,6 +67,9 @@
 #include <linux/task_work.h>
 #include <linux/android_vendor.h>
 
+#ifdef CONFIG_REK
+#include <uapi/linux/android/rekernel.h>
+#endif /* CONFIG_REK */
 #include <uapi/linux/sched/types.h>
 #include <uapi/linux/android/binder.h>
 
@@ -3116,6 +3119,13 @@ static void binder_transaction(struct binder_proc *proc,
 		target_proc = target_thread->proc;
 		target_proc->tmp_ref++;
 		binder_inner_proc_unlock(target_thread->proc);
+#ifdef CONFIG_REK
+		if (target_proc
+			&& target_proc->tsk
+			&& task_uid(target_proc->tsk).val <= MAX_SYSTEM_UID
+			&& proc->pid != target_proc->pid)
+			rekernel_report(BINDER, REPLY, proc->pid, proc->tsk, target_proc->pid, target_proc->tsk, false);
+#endif /* CONFIG_REK */
 	} else {
 		if (tr->target.handle) {
 			struct binder_ref *ref;
@@ -3168,6 +3178,13 @@ static void binder_transaction(struct binder_proc *proc,
 			goto err_dead_binder;
 		}
 		e->to_node = target_node->debug_id;
+#ifdef CONFIG_REK
+		if (target_proc
+			&& target_proc->tsk
+			&& task_uid(target_proc->tsk).val > MIN_USERAPP_UID
+			&& proc->pid != target_proc->pid)
+			rekernel_report(BINDER, TRANSACTION, proc->pid, proc->tsk, target_proc->pid, target_proc->tsk, !!(tr->flags & TF_ONE_WAY));
+#endif /* CONFIG_REK */
 		if (security_binder_transaction(binder_get_cred(proc),
 						binder_get_cred(target_proc)) < 0) {
 			return_error = BR_FAILED_REPLY;
@@ -6711,6 +6728,17 @@ err_alloc_device_names_failed:
 }
 
 device_initcall(binder_init);
+
+#ifdef CONFIG_REK
+struct task_struct* binder_buff_owner(struct binder_alloc* alloc) {
+	struct binder_proc* proc = NULL;
+	if (!alloc)
+		return NULL;
+
+	proc = container_of(alloc, struct binder_proc, alloc);
+	return proc->tsk;
+}
+#endif /* CONFIG_REK */
 
 #define CREATE_TRACE_POINTS
 #include "binder_trace.h"

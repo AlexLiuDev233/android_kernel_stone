@@ -1,0 +1,10 @@
+menu "Re:Kernel"
+
+config REK
+	tristate "Re:Kernel support"
+	default y
+	help
+	  Make tombstone users get a better experience.
+
+endmenu
+

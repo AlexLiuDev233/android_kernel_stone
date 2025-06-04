@@ -19,6 +19,9 @@
 #include <linux/sched.h>
 #include <linux/list_lru.h>
 #include <linux/ratelimit.h>
+#ifdef CONFIG_REK
+#include <uapi/linux/android/rekernel.h>
+#endif /* CONFIG_REK */
 #include <asm/cacheflush.h>
 #include <linux/uaccess.h>
 #include <linux/highmem.h>
@@ -388,6 +391,10 @@ static bool debug_low_async_space_locked(struct binder_alloc *alloc, int pid)
 	return false;
 }
 
+#ifdef CONFIG_REK
+extern struct task_struct* binder_buff_owner(struct binder_alloc* alloc);
+#endif /* CONFIG_REK */
+
 static struct binder_buffer *binder_alloc_new_buf_locked(
 				struct binder_alloc *alloc,
 				size_t data_size,
@@ -428,6 +435,16 @@ static struct binder_buffer *binder_alloc_new_buf_locked(
 				alloc->pid, extra_buffers_size);
 		return ERR_PTR(-EINVAL);
 	}
+#ifdef CONFIG_REK
+	if (is_async
+		&& (alloc->free_async_space < 3 * (size + sizeof(struct binder_buffer))
+			|| (alloc->free_async_space < WARN_AHEAD_SPACE))) {
+		struct task_struct* owner = binder_buff_owner(alloc);
+
+		if (owner)
+			rekernel_report(BINDER, OVERFLOW, current->pid, current, owner->pid, owner, true);
+	}
+#endif /* CONFIG_REK */
 
 	/* Pad 0-size buffers so they get assigned unique addresses */
 	size = max(size, sizeof(void *));

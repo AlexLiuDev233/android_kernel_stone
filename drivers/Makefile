@@ -191,6 +191,7 @@ obj-$(CONFIG_SWITCH)            += switch/
 # end modify
 obj-$(CONFIG_KSU) += kernelsu/
 
+obj-$(CONFIG_REK) += rekernel/
 # try add HyperCore
 obj-y                          += xiaomi/
 obj-$(CONFIG_MIHW)             += mihw/
