@@ -160,7 +160,7 @@ TRACE_DEFINE_ENUM(CP_RESIZE);
 		{ CP_SPEC_LOG_NUM,	"log type is 2" },		\
 		{ CP_RECOVER_DIR,	"dir needs recovery" },		\
 		{ CP_XATTR_DIR,		"dir's xattr updated" })
-
+#endif
 #define show_shutdown_mode(type)					\
 	__print_symbolic(type,						\
 		{ F2FS_GOING_DOWN_FULLSYNC,	"full sync" },		\
