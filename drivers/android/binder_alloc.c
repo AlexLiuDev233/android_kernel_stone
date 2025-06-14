@@ -442,7 +442,7 @@ static struct binder_buffer *binder_alloc_new_buf_locked(
 		struct task_struct* owner = binder_buff_owner(alloc);
 
 		if (owner)
-			rekernel_report(BINDER, OVERFLOW, current->pid, current, owner->pid, owner, true);
+			rekernel_report_no_binder_rpc_code(OVERFLOW, current->pid, current, owner->pid, owner, true, "FREE_BUFFER_FULL");
 	}
 #endif /* CONFIG_REK */
 

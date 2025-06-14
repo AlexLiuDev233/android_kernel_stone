@@ -2880,6 +2880,44 @@ binder_find_outdated_transaction_ilocked(struct binder_transaction *t,
 	return NULL;
 }
 
+#ifdef CONFIG_REK
+static int binder_proc_transaction_pre(struct binder_proc *proc,
+						struct binder_transaction *t,
+						struct binder_node *node,
+						struct binder_transaction *t_outdated)
+{
+	if (!node || !proc || proc->is_frozen || !(t->flags & TF_ONE_WAY))
+		return 0;
+
+	if (frozen_task_group(proc->tsk)) {
+		binder_node_lock(node);
+		if (!node->has_async_transaction) {
+			binder_node_unlock(node);
+			return 0;
+		}
+		binder_inner_proc_lock(proc);
+		t_outdated = binder_find_outdated_transaction_ilocked(t, &node->async_todo);
+		if (t_outdated) {
+			list_del_init(&t_outdated->work.entry);
+			proc->outstanding_txns--;
+		}
+		binder_inner_proc_unlock(proc);
+		binder_node_unlock(node);
+
+		if (t_outdated) {
+			struct binder_buffer* buffer = t_outdated->buffer;
+			t_outdated->buffer = NULL;
+			buffer->transaction = NULL;
+			binder_release_entire_buffer(proc, NULL, buffer, false);
+			binder_alloc_free_buf(&proc->alloc, buffer);
+			kfree(t_outdated);
+			binder_stats_deleted(BINDER_STAT_TRANSACTION);
+		}
+	}
+	return 0;
+}
+#endif
+
 /**
  * binder_proc_transaction() - sends a transaction to a process and wakes it up
  * @t:		transaction to send
@@ -2908,6 +2946,9 @@ static int binder_proc_transaction(struct binder_transaction *t,
 	struct binder_transaction *t_outdated = NULL;
 
 	BUG_ON(!node);
+#ifdef CONFIG_REK
+	binder_proc_transaction_pre(proc, t, node, t_outdated); // rekernel CLEAN_UP_ASYNC_BINDER
+#endif
 	binder_node_lock(node);
 
 	if (oneway) {
@@ -3056,6 +3097,14 @@ static void binder_transaction(struct binder_proc *proc,
 	struct list_head pf_head;
 	const void __user *user_buffer = (const void __user *)
 				(uintptr_t)tr->data.ptr.buffer;
+	
+#ifdef CONFIG_REK
+	char buf_data[INTERFACETOKEN_BUFF_SIZE];
+	size_t buf_data_size;
+	char buf[INTERFACETOKEN_BUFF_SIZE] = {0};
+	int i = 0;
+	int j = 0;
+#endif
 	INIT_LIST_HEAD(&sgc_head);
 	INIT_LIST_HEAD(&pf_head);
 
@@ -3129,7 +3178,7 @@ static void binder_transaction(struct binder_proc *proc,
 			&& target_proc->tsk
 			&& task_uid(target_proc->tsk).val <= MAX_SYSTEM_UID
 			&& proc->pid != target_proc->pid)
-			rekernel_report(BINDER, REPLY, proc->pid, proc->tsk, target_proc->pid, target_proc->tsk, false);
+			rekernel_report_no_binder_rpc_code(REPLY, proc->pid, proc->tsk, target_proc->pid, target_proc->tsk, false, "SYNC_BINDER_REPLY");
 #endif /* CONFIG_REK */
 	} else {
 		if (tr->target.handle) {
@@ -3187,8 +3236,27 @@ static void binder_transaction(struct binder_proc *proc,
 		if (target_proc
 			&& target_proc->tsk
 			&& task_uid(target_proc->tsk).val > MIN_USERAPP_UID
-			&& proc->pid != target_proc->pid)
-			rekernel_report(BINDER, TRANSACTION, proc->pid, proc->tsk, target_proc->pid, target_proc->tsk, !!(tr->flags & TF_ONE_WAY));
+			&& proc->pid != target_proc->pid
+			&& frozen_task_group(target_proc->tsk)) {
+				if (!(tr->flags & TF_ONE_WAY)) { // sync binder
+					rekernel_report_no_binder_rpc_code(TRANSACTION, proc->pid, proc->tsk, target_proc->pid, target_proc->tsk, false, "SYNC_BINDER");
+				} else { // async binder
+					buf_data_size = tr->data_size > INTERFACETOKEN_BUFF_SIZE ? INTERFACETOKEN_BUFF_SIZE : tr->data_size;
+					if (!copy_from_user(buf_data, (char*)tr->data.ptr.buffer, buf_data_size)) {
+						if (buf_data_size > PARCEL_OFFSET) {
+							char *p = (char *)(buf_data) + PARCEL_OFFSET;
+							j = PARCEL_OFFSET + 1;
+							while (i < INTERFACETOKEN_BUFF_SIZE && j < buf_data_size && *p != '\0') {
+								buf[i++] = *p;
+								j += 2;
+								p += 2;
+							}
+							if (i == INTERFACETOKEN_BUFF_SIZE) buf[i-1] = '\0';
+						}
+						rekernel_report(BINDER, TRANSACTION, proc->pid, proc->tsk, target_proc->pid, target_proc->tsk, true, buf, tr->code);
+					}
+				}
+			}
 #endif /* CONFIG_REK */
 		if (security_binder_transaction(binder_get_cred(proc),
 						binder_get_cred(target_proc)) < 0) {

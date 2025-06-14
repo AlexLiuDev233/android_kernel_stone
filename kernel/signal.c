@@ -1293,7 +1293,7 @@ int do_send_sig_info(int sig, struct kernel_siginfo *info, struct task_struct *p
 
 #ifdef CONFIG_REK
 	if (sig == SIGKILL || sig == SIGTERM || sig == SIGABRT || sig == SIGQUIT)
-		rekernel_report(SIGNAL, sig, current->tgid, current, p->tgid, p, false);
+		rekernel_report(SIGNAL, sig, current->tgid, current, p->tgid, p, false, "", 0);
 #endif /* CONFIG_REK */
 
 	if (lock_task_sighand(p, &flags)) {
