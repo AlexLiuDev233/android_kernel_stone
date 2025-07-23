@@ -349,7 +349,7 @@ static inline uint8_t dp_dfp_u_select_mode(struct pd_port *pd_port,
 	struct svdm_mode *remote, *local;
 	int i, j;
 	int match_score, best_match_score = 0;
-	int local_index = -1, remote_index = -1;
+	int index = -1;
 	struct tcpc_device __maybe_unused *tcpc = pd_port->tcpc;
 
 	local = &svid_data->local_mode;
@@ -368,8 +368,7 @@ static inline uint8_t dp_dfp_u_select_mode(struct pd_port *pd_port,
 				dp_remote_mode, &local_dp_config,
 				&remote_dp_config);
 			if (match_score >  best_match_score) {
-				local_index = j;
-				remote_index = i;
+				index = i;
 				dp_data->local_config = local_dp_config;
 				dp_data->remote_config = remote_dp_config;
 			}
@@ -382,7 +381,7 @@ static inline uint8_t dp_dfp_u_select_mode(struct pd_port *pd_port,
 			svid_data->remote_mode.mode_vdo[i]);
 	}
 
-	DP_INFO("SelectMode:%d\n", remote_index);
+	DP_INFO("SelectMode:%d\n", index);
 #endif	/* DP_INFO_ENABLE */
 
 	/*
@@ -391,7 +390,7 @@ static inline uint8_t dp_dfp_u_select_mode(struct pd_port *pd_port,
 	 * cap_match = DP_DFP_U_CHECK_ROLE_CAP_MATCH(dp_mode, dp_local_mode),
 	 * return cap_match ? 1 : 0;
 	 */
-	return remote_index + 1;
+	return index + 1;
 }
 
 bool dp_dfp_u_notify_discover_modes(
