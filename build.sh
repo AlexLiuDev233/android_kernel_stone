@@ -154,16 +154,6 @@ function updateclang() {
   fi
 
 }
-# KernelSU function
-function kernelsu() {
-    if [ "$KERNELSU" = "yes" ];then
-          KERNEL_VARIANT="${KERNEL_VARIANT}-KernelSU"
-          if [ ! -f "${MainPath}/KernelSU/README.md" ]; then
-             cd ${MainPath}
-             sed -i "s/CONFIG_KSU=n/CONFIG_KSU=y/g" arch/${ARCH}/configs/${DEVICE_DEFCONFIG}
-          fi
-    fi
-}
 
 # Enviromental variable
 DEVICE_MODEL="Redmi Note 12 5G/POCO X5 5G"
@@ -221,25 +211,6 @@ make -j"$CORES" ARCH=$ARCH O=out \
    fi
 }
 
-KERNEL_ZIP="${KERNEL_NAME}-${DEVICE_CODENAME}-${BUILD_TIME}.zip"
-
-# Zipping function
-function zipping() {
-    cd ${AnyKernelPath} || exit 1
-    if [ "$KERNELSU" = "yes" ];then
-      VARIANT="[KSU] "
-      sed -i "s/kernel.string=.*/kernel.string=${KERNEL_NAME} ${SUBLEVEL} ${KERNEL_VARIANT} by ${KBUILD_BUILD_USER} for ${DEVICE_MODEL} (${DEVICE_CODENAME}) | KernelSU Version: ${KERNELSU_VERSION}/g" anykernel.sh
-    else
-      VARIANT="[Non-KSU] "
-      sed -i "s/kernel.string=.*/kernel.string=${KERNEL_NAME} ${SUBLEVEL} ${KERNEL_VARIANT} by ${KBUILD_BUILD_USER} for ${DEVICE_MODEL} (${DEVICE_CODENAME})/g" anykernel.sh
-    fi
-    zip -r9 "${VARIANT}${KERNEL_ZIP}" * -x .git README.md *placeholder
-    mv "${VARIANT}${KERNEL_ZIP}" ~/
-    cd ..
-    sudo rm -rf ${AnyKernelPath}
-    cleanup
-}
-
 # Cleanup function
 function cleanup() {
     cd ${MainPath}
@@ -250,9 +221,6 @@ function cleanup() {
 
 getclang
 updateclang
-kernelsu
 compile
-zipping
-cleanup
 END=$(date +"%s")
 DIFF=$(($END - $START))
