@@ -1433,6 +1433,7 @@ extern int send_sigurg(struct fown_struct *fown);
 #define SB_ENC_STRICT_MODE_FL		(1 << 0)
 #define SB_ENC_NO_COMPAT_FALLBACK_FL	(1 << 1)
 
+#define sb_has_strict_encoding sb_has_enc_strict_mode
 #define sb_has_enc_strict_mode(sb) \
 	(sb->s_encoding_flags & SB_ENC_STRICT_MODE_FL)
 
