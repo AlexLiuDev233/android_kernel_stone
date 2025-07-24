@@ -2728,8 +2728,7 @@ static int bq25890_resume(struct device *dev)
 	if (bq->charger) {
 		power_supply_changed(bq->charger);
 		if (IS_ERR(bq->charger)) {
-			pr_err("Cannot get bq->charger,err_line=%d\n", __LINE__);
-			PTR_ERR(bq->charger);
+			pr_err("Cannot get bq->charger, err=%ld, line=%d\n", PTR_ERR(bq->charger), __LINE__);
 		}
 	}
 
