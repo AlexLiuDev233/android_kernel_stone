@@ -2,7 +2,6 @@
 #include <linux/types.h>
 #include <net/sock.h>
 #include <linux/netlink.h>
-#include <linux/proc_fs.h>
 
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
@@ -22,27 +21,7 @@ static const char *binder_type[] = {
 
 static int netlink_unit = NETLINK_REKERNEL_MIN;
 
-static int rekernel_unit_show(struct seq_file *m, void *v)
-{
-	seq_printf(m, "%d\n", netlink_unit);
-	return 0;
-}
-
-static int rekernel_unit_open(struct inode *inode, struct file *file)
-{
-	return single_open(file, rekernel_unit_show, NULL);
-}
-
 static struct sock* netlink_socket = NULL;
-static struct proc_dir_entry* rekernel_dir, * rekernel_unit_entry;
-static const struct file_operations rekernel_unit_fops = {
-	.open		= rekernel_unit_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-	.owner		= THIS_MODULE,
-};
-
 static int start_rekernel_server(void)
 {
 	struct netlink_kernel_cfg rekernel_cfg = {};
@@ -60,16 +39,6 @@ static int start_rekernel_server(void)
 		return -1;
 	}
 	pr_info("Created Re:Kernel server! NETLINK UNIT: %d\n", netlink_unit);
-	rekernel_dir = proc_mkdir("rekernel", NULL);
-	if (!rekernel_dir)
-		pr_err("create /proc/rekernel failed!\n");
-	else {
-		char buff[32];
-		sprintf(buff, "%d", netlink_unit);
-		rekernel_unit_entry = proc_create(buff, 0644, rekernel_dir, &rekernel_unit_fops);
-		if (!rekernel_unit_entry)
-			pr_err("create rekernel unit failed!\n");
-	}
 	return 0;
 }
 
