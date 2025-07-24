@@ -22,7 +22,6 @@ export $(grep -v '^#' config.env | xargs)
 # Path
 MainPath="$(readlink -f -- $(pwd))"
 MainClangPath="${MainPath}/clang"
-AnyKernelPath="${MainPath}/anykernel"
 CrossCompileFlagTriple="aarch64-linux-gnu-"
 CrossCompileFlag64="aarch64-linux-gnu-"
 CrossCompileFlag32="arm-linux-gnueabi-"
@@ -195,13 +194,7 @@ make -j"$CORES" ARCH=$ARCH O=out \
     CROSS_COMPILE_ARM32=${CrossCompileFlag32} |& tee out/output.txt
 
    if [[ -f "$IMAGE" ]]; then
-      cd ${MainPath}
-      git clone --depth=1 ${AnyKernelRepo} -b ${AnyKernelBranch} ${AnyKernelPath}
-      cp $IMAGE ${AnyKernelPath}
-      if [[ -f "$DTB_IMAGE" ]]; then
-        rm -rf ${AnyKernelPath}/dtb
-        cp $DTB_IMAGE ${AnyKernelPath}/dtb
-      fi
+      echo "Build Successful."
    else
       echo "❌ Compile Kernel for $DEVICE_CODENAME failed, Check console log to fix it!"
       if [ "$CLEANUP" = "yes" ];then
