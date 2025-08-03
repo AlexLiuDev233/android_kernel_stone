@@ -11,6 +11,7 @@ if POWER_SUPPLY
 
 config POWER_SUPPLY_DEBUG
 	bool "Power supply debug"
+	default n
 	help
 	  Say Y here to enable debugging messages for power supply class
 	  and drivers.

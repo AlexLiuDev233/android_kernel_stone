@@ -6,5 +6,11 @@ config REK
 	help
 	  Make tombstone users get a better experience.
 
+config REK_DEBUG
+	bool "Re:Kernel debug mode"
+	default n
+	help
+	  Enable Re:Kernel debug logging output.
+
 endmenu
 

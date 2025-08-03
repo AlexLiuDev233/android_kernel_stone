@@ -46,17 +46,23 @@ static int rekernel_send_netlink_message(char* msg, uint16_t len) {
 	struct sk_buff* skbuffer;
 	struct nlmsghdr* nlhdr;
 
-	pr_info("Sending Re:Kernel Netlink Message: %s", msg);
+#ifdef CONFIG_REK_DEBUG
+	pr_info("Sending Re:Kernel Netlink Message: %s", msg);// 事实证明，我们不能打印，打印就该卡成ppt了
+#endif
 
 	skbuffer = nlmsg_new(len, GFP_ATOMIC);
 	if (!skbuffer) {
+#ifdef CONFIG_REK_DEBUG
 		pr_err("netlink alloc failure.\n");
+#endif
 		return -1;
 	}
 
 	nlhdr = nlmsg_put(skbuffer, 0, 0, netlink_unit, len, 0);
 	if (!nlhdr) {
+#ifdef CONFIG_REK_DEBUG
 		pr_err("nlmsg_put failaure.\n");
+#endif
 		nlmsg_free(skbuffer);
 		return -1;
 	}
