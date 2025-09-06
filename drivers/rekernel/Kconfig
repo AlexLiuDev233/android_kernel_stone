@@ -8,6 +8,7 @@ config REK
 
 config REK_DEBUG
 	bool "Re:Kernel debug mode"
+	depends on REK
 	default n
 	help
 	  Enable Re:Kernel debug logging output.
