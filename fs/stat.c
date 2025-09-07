@@ -395,6 +395,10 @@ SYSCALL_DEFINE2(newlstat, const char __user *, filename,
 extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 #endif
 
+#ifdef CONFIG_HMA_PP
+extern inline int hmapp_check_path(const char __user *filename);
+#endif
+
 #if !defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_SYS_NEWFSTATAT)
 SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
 		struct stat __user *, statbuf, int, flag)
@@ -402,6 +406,9 @@ SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
 	struct kstat stat;
 	int error;
 
+#ifdef CONFIG_HMA_PP
+        if (unlikely(hmapp_check_path(filename))) return -EACCES;
+#endif
 #ifdef CONFIG_KSU
 	ksu_handle_stat(&dfd, &filename, &flag);
 #endif
@@ -556,6 +563,9 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
 	struct kstat stat;
 	int error;
 
+#ifdef CONFIG_HMA_PP
+        if (unlikely(hmapp_check_path(filename))) return -EACCES;
+#endif
 #ifdef CONFIG_KSU
 	ksu_handle_stat(&dfd, &filename, &flag); /* 32-bit su */
 #endif

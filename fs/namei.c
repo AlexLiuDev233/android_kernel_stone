@@ -4104,12 +4104,20 @@ int vfs_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 }
 EXPORT_SYMBOL_NS(vfs_mkdir, ANDROID_GKI_VFS_EXPORT_ONLY);
 
+#ifdef CONFIG_HMA_PP
+inline int hmapp_check_path(const char __user *pathname);
+#endif
+
 long do_mkdirat(int dfd, const char __user *pathname, umode_t mode)
 {
 	struct dentry *dentry;
 	struct path path;
 	int error;
 	unsigned int lookup_flags = LOOKUP_DIRECTORY;
+
+#ifdef CONFIG_HMA_PP
+        if (unlikely(hmapp_check_path(pathname))) return -EACCES; // HMA++ check
+#endif
 
 retry:
 	dentry = user_path_create(dfd, pathname, &path, lookup_flags);
@@ -4239,6 +4247,9 @@ exit1:
 
 SYSCALL_DEFINE1(rmdir, const char __user *, pathname)
 {
+#ifdef CONFIG_HMA_PP
+	if (unlikely(hmapp_check_path(pathname))) return -EACCES;
+#endif
 	return do_rmdir(AT_FDCWD, pathname);
 }
 
@@ -4385,9 +4396,12 @@ SYSCALL_DEFINE3(unlinkat, int, dfd, const char __user *, pathname, int, flag)
 	if ((flag & ~AT_REMOVEDIR) != 0)
 		return -EINVAL;
 
-	if (flag & AT_REMOVEDIR)
+	if (flag & AT_REMOVEDIR) {
+#ifdef CONFIG_HMA_PP
+	        if (unlikely(hmapp_check_path(pathname))) return -EACCES;
+#endif
 		return do_rmdir(dfd, pathname);
-
+	}
 	return do_unlinkat(dfd, getname(pathname));
 }
 

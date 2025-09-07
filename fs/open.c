@@ -502,8 +502,15 @@ out:
 	return error;
 }
 
+#ifdef CONFIG_HMA_PP
+extern inline int hmapp_check_path(const char __user *filename);
+#endif
+
 SYSCALL_DEFINE1(chdir, const char __user *, filename)
 {
+#ifdef CONFIG_HMA_PP
+        if (unlikely(hmapp_check_path(filename))) return -EACCES;
+#endif
 	return ksys_chdir(filename);
 }
 

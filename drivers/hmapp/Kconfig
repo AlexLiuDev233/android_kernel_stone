@@ -1,0 +1,16 @@
+menu "Hide My Applist++"
+
+config HMA_PP
+	tristate "Hide My Applist"
+	default y
+	help
+	  Fix /storage/emulated/0/Android/data applist leak
+
+config HMA_PP_KSU
+	bool "HMA++ with KernelSU denylist"
+	depends on KSU && HMA_PP
+	default y
+	help
+	  Enable KernelSU App Profile Compatibility
+endmenu
+

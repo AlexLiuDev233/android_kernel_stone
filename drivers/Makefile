@@ -192,6 +192,7 @@ obj-$(CONFIG_SWITCH)            += switch/
 obj-$(CONFIG_KSU) += kernelsu/
 
 obj-$(CONFIG_REK) += rekernel/
+obj-$(CONFIG_HMA_PP) += hmapp/
 # try add HyperCore
 obj-y                          += xiaomi/
 obj-$(CONFIG_MIHW)             += mihw/
