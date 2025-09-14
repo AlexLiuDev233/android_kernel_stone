@@ -1,3 +1,7 @@
 [submodule "KernelSU"] 
   path = KernelSU 
   url = git@github.com:AlexLiuDev233/self_use_ksu
+
+[submodule "Baseband-guard"]
+  path = Baseband-guard
+  url = git@github.com:vc-teahouse/Baseband-guard
