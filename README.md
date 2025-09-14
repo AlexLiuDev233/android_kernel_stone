@@ -1,16 +1,4 @@
-# Redmi Note 12 5G (sunstone) / Poco X5 5G (sunstone) kernel
-original kernel develop by SingkoLab
-modifed by AlexLiuDev233
-
-This modify version of kernel bundled [SuSFS](https://gitlab.com/simonpunk/susfs4ksu) & [KernelSU](https://github.com/tiann/KernelSU) & [KernelSU Magic Mount](https://github.com/5ec1cff/KernelSU)
-
-# OpenSource Program License
-[SuSFS](https://gitlab.com/simonpunk/susfs4ksu) Licensed by GPL-3.0 license
-[KernelSU](https://github.com/tiann/KernelSU) Licensed by GPL-3.0  license
-[KernelSU Magic Mount](https://github.com/5ec1cff/KernelSU) Licensed by GPL-3.0 license
-[Android Common Kernel](https://android.googlesource.com/kernel/common/) Licensed by GPL-2.0 license
-
-# How do I submit patches to Android Common Kernels
+How do I submit patches to Android Common Kernels
 
 1. BEST: Make all of your changes to upstream Linux. If appropriate, backport to the stable releases.
    These patches will be merged automatically in the corresponding common kernels. If the patch is already
