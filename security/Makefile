@@ -35,4 +35,4 @@ obj-$(CONFIG_CGROUP_DEVICE)		+= device_cgroup.o
 subdir-$(CONFIG_INTEGRITY)		+= integrity
 obj-$(CONFIG_INTEGRITY)			+= integrity/
 
-obj-$(CONFIG_SECURITY_BASEBAND_GUARD) += baseband-guard/baseband_guard.o
+obj-$(CONFIG_BBG) += baseband-guard/
