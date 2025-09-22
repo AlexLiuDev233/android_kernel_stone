@@ -348,12 +348,11 @@ static int filldir64(struct dir_context *ctx, const char *name, int namlen,
 	prev_reclen = buf->prev_reclen;
 	if (prev_reclen && signal_pending(current))
 		return -EINTR;
-// #ifdef CONFIG_KSU_SUSFS_SUS_PATH
-// 		// why? why umount for root app?
-// 		if (likely(current->susfs_task_state & TASK_STRUCT_NON_ROOT_USER_APP_PROC) && susfs_sus_ino_for_filldir64(ino)) {
-// 			return 0;
-// 		}
-// #endif
+#ifdef CONFIG_KSU_SUSFS_SUS_PATH
+		if (susfs_sus_ino_for_filldir64(ino)) {
+			return 0;
+		}
+#endif
 	dirent = buf->current_dir;
 	prev = (void __user *)dirent - prev_reclen;
 	if (!user_access_begin(prev, reclen + prev_reclen))
