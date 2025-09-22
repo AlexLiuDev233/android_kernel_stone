@@ -46,10 +46,6 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/namei.h>
 
-#ifdef CONFIG_KSU_SUSFS
-#include <linux/susfs.h>
-#endif
-
 /* [Feb-1997 T. Schoebel-Theuer]
  * Fundamental changes in the pathname lookup mechanisms (namei)
  * were necessary because of omirr.  The reason is that omirr needs
@@ -3713,13 +3709,6 @@ struct file *do_filp_open(int dfd, struct filename *pathname,
 	int flags = op->lookup_flags;
 	struct file *filp;
 
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	int error;
-	if (susfs_sus_path_by_filename(pathname, &error, SYSCALL_FAMILY_ALL_ENOENT)) {
-		return ERR_PTR(error);
-	}
-#endif
-
 	set_nameidata(&nd, dfd, pathname);
 	filp = path_openat(&nd, op, flags | LOOKUP_RCU);
 	if (unlikely(filp == ERR_PTR(-ECHILD)))
@@ -3908,19 +3897,6 @@ long do_mknodat(int dfd, const char __user *filename, umode_t mode,
 	int error;
 	unsigned int lookup_flags = 0;
 
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	struct filename* fname;
-	int status;
-
-	fname = getname_safe(filename);
-	status = susfs_sus_path_by_filename(fname, &error, SYSCALL_FAMILY_MKNOD);
-	putname_safe(fname);
-
-	if (status) {
-		return error;
-	}
-#endif
-
 	error = may_mknod(mode);
 	if (error)
 		return error;
@@ -4007,20 +3983,6 @@ long do_mkdirat(int dfd, const char __user *pathname, umode_t mode)
 #ifdef CONFIG_HMA_PP
         if (unlikely(hmapp_check_path(pathname))) return -EACCES; // HMA++ check
 #endif
-
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	struct filename* fname;
-	int status;
-
-	fname = getname_safe(pathname);
-	status = susfs_sus_path_by_filename(fname, &error, SYSCALL_FAMILY_MKDIRAT);
-	putname_safe(fname);
-
-	if (status) {
-		return error;
-	}
-#endif
-
 retry:
 	dentry = user_path_create(dfd, pathname, &path, lookup_flags);
 	if (IS_ERR(dentry))
@@ -4096,21 +4058,6 @@ long do_rmdir(int dfd, const char __user *pathname)
 	struct qstr last;
 	int type;
 	unsigned int lookup_flags = 0;
-
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	struct filename* fname;
-	int status;
-
-	fname = getname_safe(pathname);
-	status = susfs_sus_path_by_filename(fname, &error, SYSCALL_FAMILY_RMDIR);
-	putname_safe(fname);
-
-	if (status) {
-		return error;
-	}
-	error = 0;
-#endif
-
 retry:
 	name = filename_parentat(dfd, getname(pathname), lookup_flags,
 				&path, &last, &type);
@@ -4245,17 +4192,6 @@ long do_unlinkat(int dfd, struct filename *name)
 	struct inode *inode = NULL;
 	struct inode *delegated_inode = NULL;
 	unsigned int lookup_flags = 0;
-
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	int status;
-
-	status = susfs_sus_path_by_filename(name, &error, SYSCALL_FAMILY_UNLINKAT);
-
-	if (status) {
-		return error;
-	}
-#endif
-
 retry:
 	name = filename_parentat(dfd, name, lookup_flags, &path, &last, &type);
 	if (IS_ERR(name))
@@ -4365,19 +4301,6 @@ long do_symlinkat(const char __user *oldname, int newdfd,
 	struct dentry *dentry;
 	struct path path;
 	unsigned int lookup_flags = 0;
-
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	struct filename* fname;
-	int status;
-
-	fname = getname_safe(newname);
-	status = susfs_sus_path_by_filename(fname, &error, SYSCALL_FAMILY_SYMLINKAT_NEWNAME);
-	putname_safe(fname);
-
-	if (status) {
-		return error;
-	}
-#endif
 
 	from = getname(oldname);
 	if (IS_ERR(from))
@@ -4509,27 +4432,6 @@ int do_linkat(int olddfd, const char __user *oldname, int newdfd,
 	struct inode *delegated_inode = NULL;
 	int how = 0;
 	int error;
-
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	struct filename* fname;
-	int status;
-
-	fname = getname_safe(oldname);
-	status = susfs_sus_path_by_filename(fname, &error, SYSCALL_FAMILY_LINKAT_OLDNAME);
-	putname_safe(fname);
-
-	if (status) {
-		return error;
-	}
-
-	fname = getname_safe(newname);
-	status = susfs_sus_path_by_filename(fname, &error, SYSCALL_FAMILY_LINKAT_NEWNAME);
-	putname_safe(fname);
-
-	if (status) {
-		return error;
-	}
-#endif
 
 	if ((flags & ~(AT_SYMLINK_FOLLOW | AT_EMPTY_PATH)) != 0)
 		return -EINVAL;
@@ -4812,27 +4714,6 @@ static int do_renameat2(int olddfd, const char __user *oldname, int newdfd,
 	unsigned int lookup_flags = 0, target_flags = LOOKUP_RENAME_TARGET;
 	bool should_retry = false;
 	int error;
-
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	struct filename* fname;
-	int status;
-
-	fname = getname_safe(oldname);
-	status = susfs_sus_path_by_filename(fname, &error, SYSCALL_FAMILY_RENAMEAT2_OLDNAME);
-	putname_safe(fname);
-
-	if (status) {
-		return error;
-	}
-
-	fname = getname_safe(newname);
-	status = susfs_sus_path_by_filename(fname, &error, SYSCALL_FAMILY_RENAMEAT2_NEWNAME);
-	putname_safe(fname);
-
-	if (status) {
-		return error;
-	}
-#endif
 
 	if (flags & ~(RENAME_NOREPLACE | RENAME_EXCHANGE | RENAME_WHITEOUT))
 		return -EINVAL;
