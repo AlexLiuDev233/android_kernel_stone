@@ -95,9 +95,6 @@ static void inotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark)
 {
 	struct inotify_inode_mark *inode_mark;
 	struct inode *inode;
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	struct mount *mnt = NULL;
-#endif
 
 	if (mark->connector->type != FSNOTIFY_OBJ_TYPE_INODE)
 		return;
@@ -106,10 +103,8 @@ static void inotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark)
 	inode = igrab(fsnotify_conn_inode(mark->connector));
 	if (inode) {
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-		mnt = real_mount(file->f_path.mnt);
-		if (likely(susfs_is_current_proc_umounted()) &&
-					mnt->mnt_id >= DEFAULT_KSU_MNT_ID)
-		{
+		if (likely(susfs_is_current_non_root_user_app_proc()) &&
+				unlikely(inode->i_mapping->flags & BIT_SUS_KSTAT)) {
 			struct path path;
 			char *pathname = kmalloc(PAGE_SIZE, GFP_KERNEL);
 			char *dpath;
