@@ -5,3 +5,7 @@
 [submodule "Baseband-guard"]
   path = Baseband-guard
   url = git@github.com:vc-teahouse/Baseband-guard
+
+[submodule "lunarkernel_sched_extention"]
+  path = lunarkernel_sched_extention
+  url = git@github.com:LunarKernel-Dev/lunarkernel_sched_extention.git

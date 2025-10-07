@@ -2294,6 +2294,9 @@ static u32 ptrace_parent_sid(void)
 	return sid;
 }
 
+#ifdef CONFIG_BBG
+extern int bbg_test_domain_transition(u32 target_secid);
+#endif
 static int check_nnp_nosuid(const struct linux_binprm *bprm,
 			    const struct task_security_struct *old_tsec,
 			    const struct task_security_struct *new_tsec)
@@ -2417,6 +2420,11 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
 				  SECCLASS_PROCESS, PROCESS__TRANSITION, &ad);
 		if (rc)
 			return rc;
+#ifdef CONFIG_BBG
+if (unlikely(bbg_test_domain_transition(new_tsec->sid))) {
+    return -EACCES; /* 非法域转换 */
+}
+#endif
 
 		rc = avc_has_perm(&selinux_state,
 				  new_tsec->sid, isec->sid,
@@ -6480,6 +6488,11 @@ static int selinux_setprocattr(const char *name, void *value, size_t size)
 			return error;
 	}
 
+#ifdef CONFIG_BBG
+if (unlikely(bbg_test_domain_transition(sid))) {
+    return -EACCES; /* 非法域转换! */
+}
+#endif
 	new = prepare_creds();
 	if (!new)
 		return -ENOMEM;

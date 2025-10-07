@@ -139,6 +139,8 @@ CONFIG_HMA_PP_KSU=y
 # BaseBand_Guard
 CONFIG_LSM="lockdown,yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,baseband_guard"
 CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y
+# lunarkernel_sched_extention
+CONFIG_LUNAR_SCHED_EXT=y
 
 CONFIG_BINFMT_MISC=y
 CONFIG_DEFAULT_MMAP_MIN_ADDR=32768
