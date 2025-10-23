@@ -134,8 +134,8 @@ CONFIG_REK=y
 # BBR
 CONFIG_DEFAULT_BBR=y
 # HMA++
-CONFIG_HMA_PP=y
-CONFIG_HMA_PP_KSU=y
+CONFIG_HMA_PP=n
+CONFIG_HMA_PP_KSU=n
 # BaseBand_Guard
 CONFIG_LSM="lockdown,yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,baseband_guard"
 CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y
