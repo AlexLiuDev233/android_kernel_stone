@@ -93,7 +93,7 @@ function getclang() {
       cd clang-greenforce
       wget -q https://raw.githubusercontent.com/greenforce-project/greenforce_clang/main/get_latest_url.sh
       source get_latest_url.sh; rm -rf get_latest_url.sh
-      wget -q $LATEST_URL_GZ -O "greenforce-clang.tar.gz"
+      wget -q $LATEST_URL -O "greenforce-clang.tar.gz"
       tar -xf greenforce-clang.tar.gz
       ClangPath="${MainClangPath}"-greenforce
       export PATH="${ClangPath}/bin:${PATH}"
