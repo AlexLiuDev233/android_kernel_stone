@@ -22,9 +22,6 @@
 #include <trace/hooks/sysrqcrash.h>
 #include <trace/hooks/cgroup.h>
 #include <trace/hooks/sys.h>
-#include <trace/hooks/printk.h>
-#include <trace/hooks/gic_v3.h>
-#include <trace/hooks/epoch.h>
 #include <trace/hooks/cpufreq.h>
 
 /*
