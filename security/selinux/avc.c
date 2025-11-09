@@ -732,7 +732,9 @@ static void avc_audit_post_callback(struct audit_buffer *ab, void *a)
 		kfree(scontext);
 	}
 
+#ifdef CONFIG_KSU_SUSFS
 bypass_orig_flow:
+#endif
 	audit_log_format(ab, " tclass=%s", secclass_map[sad->tclass-1].name);
 
 	if (sad->denied)
