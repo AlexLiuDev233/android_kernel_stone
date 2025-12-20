@@ -1,6 +1,6 @@
 [submodule "KernelSU"] 
   path = KernelSU 
-  url = git@github.com:SukiSU-Ultra/SukiSU-Ultra
+  url = git@github.com:ReSukiSU/ReSukiSU
 
 [submodule "Baseband-guard"]
   path = Baseband-guard
