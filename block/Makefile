@@ -39,3 +39,7 @@ obj-$(CONFIG_BLK_PM)		+= blk-pm.o
 obj-$(CONFIG_BLK_INLINE_ENCRYPTION)	+= keyslot-manager.o bio-crypt-ctx.o \
 					   blk-crypto.o
 obj-$(CONFIG_BLK_INLINE_ENCRYPTION_FALLBACK)	+= blk-crypto-fallback.o
+
+obj-$(CONFIG_CPQ_IOSCHED)	+= cpq/
+
+obj-$(CONFIG_FSCK_BOOST)        += fsck_boost.o

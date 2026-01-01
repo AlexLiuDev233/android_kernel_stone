@@ -19,6 +19,10 @@
 #include <linux/genhd.h>
 #include <linux/blktrace_api.h>
 
+#ifdef CONFIG_FSCK_BOOST
+#include <linux/fsck_boost.h>
+#endif
+
 #include "partitions/check.h"
 
 #ifdef CONFIG_BLK_DEV_MD
@@ -407,6 +411,10 @@ struct hd_struct *add_partition(struct gendisk *disk, int partno,
 
 	/* everything is up and running, commence */
 	rcu_assign_pointer(ptbl->part[partno], p);
+
+#ifdef CONFIG_FSCK_BOOST
+	fsck_boost_start(disk, info, partno, len);
+#endif
 
 	/* suppress uevent if the disk suppresses it */
 	if (!dev_get_uevent_suppress(ddev))

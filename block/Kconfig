@@ -225,4 +225,12 @@ config BLK_MQ_RDMA
 config BLK_PM
 	def_bool BLOCK && PM
 
+config FSCK_BOOST
+	bool "fsck boost"
+	default n
+	help
+		Prefetech meta data of disk partition to speed up fsck.
+		Say Y here if it is supported.
+
 source "block/Kconfig.iosched"
+source "block/cpq/Kconfig"

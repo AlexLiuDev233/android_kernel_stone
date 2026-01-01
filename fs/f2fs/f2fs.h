@@ -1667,6 +1667,10 @@ struct f2fs_sb_info {
 
 	struct kmem_cache *inline_xattr_slab;	/* inline xattr entry */
 	unsigned int inline_xattr_slab_size;	/* default inline xattr slab size */
+
+#ifdef CONFIG_FSCK_BOOST
+	int inited;
+#endif
 };
 
 struct f2fs_private_dio {
@@ -1879,6 +1883,13 @@ static inline struct address_space *NODE_MAPPING(struct f2fs_sb_info *sbi)
 {
 	return sbi->node_inode->i_mapping;
 }
+
+#ifdef CONFIG_FSCK_BOOST
+static inline struct address_space *BDEV_MAPPING(struct f2fs_sb_info *sbi)
+{
+	return sbi->sb->s_bdev->bd_inode->i_mapping;
+}
+#endif
 
 static inline bool is_sbi_flag_set(struct f2fs_sb_info *sbi, unsigned int type)
 {

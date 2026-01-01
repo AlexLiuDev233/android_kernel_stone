@@ -32,6 +32,10 @@
 #include "gc.h"
 #include "trace.h"
 
+#ifdef CONFIG_FSCK_BOOST
+#include <linux/fsck_boost.h>
+#endif
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/f2fs.h>
 
@@ -3750,6 +3754,10 @@ try_onemore:
 #endif
 	f2fs_init_extent_cache_info(sbi);
 
+#ifdef CONFIG_FSCK_BOOST
+	sbi->inited = 1;
+#endif
+
 	f2fs_init_ino_entry_info(sbi);
 
 	f2fs_init_fsync_node_info(sbi);
@@ -3944,6 +3952,11 @@ reset_checkpoint:
 	f2fs_update_time(sbi, CP_TIME);
 	f2fs_update_time(sbi, REQ_TIME);
 	clear_sbi_flag(sbi, SBI_CP_DISABLED_QUICK);
+	
+#ifdef CONFIG_FSCK_BOOST
+	fsck_boost_end(sb->s_bdev);
+#endif
+
 	return 0;
 
 sync_free_meta:

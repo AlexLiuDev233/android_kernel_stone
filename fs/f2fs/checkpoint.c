@@ -21,6 +21,10 @@
 #include "trace.h"
 #include <trace/events/f2fs.h>
 
+#ifdef CONFIG_FSCK_BOOST
+#include <linux/fsck_boost.h>
+#endif
+
 #define DEFAULT_CHECKPOINT_IOPRIO (IOPRIO_PRIO_VALUE(IOPRIO_CLASS_BE, 3))
 
 static struct kmem_cache *ino_entry_slab;
@@ -56,7 +60,7 @@ repeat:
 static struct page *__get_meta_page(struct f2fs_sb_info *sbi, pgoff_t index,
 							bool is_meta)
 {
-	struct address_space *mapping = META_MAPPING(sbi);
+	struct address_space *mapping;
 	struct page *page;
 	struct f2fs_io_info fio = {
 		.sbi = sbi,
@@ -69,6 +73,17 @@ static struct page *__get_meta_page(struct f2fs_sb_info *sbi, pgoff_t index,
 		.is_por = !is_meta,
 	};
 	int err;
+
+#ifdef CONFIG_FSCK_BOOST
+	if (!sbi->inited) {
+		mapping = BDEV_MAPPING(sbi);
+		page = find_lock_page(mapping, index);
+		if (page && PageUptodate(page))
+			return page;
+	}
+#endif
+
+	mapping = META_MAPPING(sbi);
 
 	if (unlikely(!is_meta))
 		fio.op_flags &= ~REQ_META;
