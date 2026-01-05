@@ -1626,7 +1626,7 @@ extern void flush_smp_call_function_from_idle(void);
 static inline void flush_smp_call_function_from_idle(void) { }
 static inline void sched_ttwu_pending(void) { }
 static inline int newidle_balance(struct rq *this_rq, struct rq_flags *rf) { return 0; }
-#endif
+#endif /* CONFIG_SMP */
 
 #include "stats.h"
 #include "autogroup.h"
