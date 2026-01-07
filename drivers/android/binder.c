@@ -3223,6 +3223,13 @@ static void binder_transaction(struct binder_proc *proc,
 			goto err_dead_binder;
 		}
 		e->to_node = target_node->debug_id;
+		if (security_binder_transaction(binder_get_cred(proc),
+						binder_get_cred(target_proc)) < 0) {
+			return_error = BR_FAILED_REPLY;
+			return_error_param = -EPERM;
+			return_error_line = __LINE__;
+			goto err_invalid_target_handle;
+		}
 #ifdef CONFIG_REK
 		if (target_proc
 			&& target_proc->tsk
@@ -3249,13 +3256,6 @@ static void binder_transaction(struct binder_proc *proc,
 				}
 			}
 #endif /* CONFIG_REK */
-		if (security_binder_transaction(binder_get_cred(proc),
-						binder_get_cred(target_proc)) < 0) {
-			return_error = BR_FAILED_REPLY;
-			return_error_param = -EPERM;
-			return_error_line = __LINE__;
-			goto err_invalid_target_handle;
-		}
 		binder_inner_proc_lock(proc);
 
 		w = list_first_entry_or_null(&thread->todo,
