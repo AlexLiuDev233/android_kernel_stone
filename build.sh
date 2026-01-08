@@ -29,129 +29,25 @@ CrossCompileFlag32="arm-linux-gnueabi-"
 # Clone toolchain
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
 function getclang() {
-  if [ "${ClangName}" = "azure" ]; then
-    if [ ! -f "${MainClangPath}-azure/bin/clang" ]; then
-      echo "[!] Clang is set to azure, cloning it..."
-      git clone https://gitlab.com/Panchajanya1999/azure-clang clang-azure --depth=1
-      ClangPath="${MainClangPath}"-azure
-      export PATH="${ClangPath}/bin:${PATH}"
-      cd ${ClangPath}
-      wget "https://gist.github.com/dakkshesh07/240736992abf0ea6f0ee1d8acb57a400/raw/a835c3cf8d99925ca33cec3b210ee962904c9478/patch-for-old-glibc.sh" -O patch.sh && chmod +x patch.sh && ./patch.sh
-      cd ..
-    else
-      echo "[!] Clang already exists. Skipping..."
-      ClangPath="${MainClangPath}"-azure
-      export PATH="${ClangPath}/bin:${PATH}"
-    fi
-  elif [ "${ClangName}" = "neutron" ] || [ "${ClangName}" = "" ]; then
-    if [ ! -f "${MainClangPath}-neutron/bin/clang" ]; then
-      echo "[!] Clang is set to neutron, cloning it..."
-      mkdir -p "${MainClangPath}"-neutron
-      ClangPath="${MainClangPath}"-neutron
-      export PATH="${ClangPath}/bin:${PATH}"
-      cd ${ClangPath}
-      curl -LOk "https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman"
-      chmod +x antman && ./antman -S
-      ./antman --patch=glibc
-      cd ..
-    else
-      echo "[!] Clang already exists. Skipping..."
-      ClangPath="${MainClangPath}"-neutron
-      export PATH="${ClangPath}/bin:${PATH}"
-    fi
-  elif [ "${ClangName}" = "proton" ]; then
-    if [ ! -f "${MainClangPath}-proton/bin/clang" ]; then
-      echo "[!] Clang is set to proton, cloning it..."
-      git clone https://github.com/kdrag0n/proton-clang clang-proton --depth=1
-      ClangPath="${MainClangPath}"-proton
-      export PATH="${ClangPath}/bin:${PATH}"
-    else
-      echo "[!] Clang already exists. Skipping..."
-      ClangPath="${MainClangPath}"-proton
-      export PATH="${ClangPath}/bin:${PATH}"
-    fi
-  elif [ "${ClangName}" = "zyc" ]; then
-    if [ ! -f "${MainClangPath}-zyc/bin/clang" ]; then
-      echo "[!] Clang is set to zyc, cloning it..."
-      mkdir -p ${MainClangPath}-zyc
-      cd clang-zyc
-      wget -q $(curl -k https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt 2>/dev/null) -O "zyc-clang.tar.gz"
-      tar -xf zyc-clang.tar.gz
-      ClangPath="${MainClangPath}"-zyc
-      export PATH="${ClangPath}/bin:${PATH}"
-      rm -f zyc-clang.tar.gz
-      cd ..
-    else
-      echo "[!] Clang already exists. Skipping..."
-      ClangPath="${MainClangPath}"-zyc
-      export PATH="${ClangPath}/bin:${PATH}"
-    fi
-  elif [ "${ClangName}" = "greenforce" ]; then
-    if [ ! -f "${MainClangPath}-greenforce/bin/clang" ]; then
-      echo "[!] Clang is set to greenforce, cloning it..."
-      mkdir -p ${MainClangPath}-greenforce
-      cd clang-greenforce
-      wget -q https://raw.githubusercontent.com/greenforce-project/greenforce_clang/main/get_latest_url.sh
-      source get_latest_url.sh; rm -rf get_latest_url.sh
-      wget -q $LATEST_URL -O "greenforce-clang.tar.gz"
-      tar -xf greenforce-clang.tar.gz
-      ClangPath="${MainClangPath}"-greenforce
-      export PATH="${ClangPath}/bin:${PATH}"
-      rm -f greenforce-clang.tar.gz
-      cd ..
-    else
-      echo "[!] Clang already exists. Skipping..."
-      ClangPath="${MainClangPath}"-greenforce
-      export PATH="${ClangPath}/bin:${PATH}"
-    fi
+  if [ ! -f "${MainClangPath}/bin/clang" ]; then
+    echo "[!] Using AOSP Clang, cloning..."
+    mkdir -p clang
+    aria2c -s16 -x16 -k1M https://github.com/cctv18/oneplus_sm8650_toolchain/releases/download/LLVM-Clang18-r510928/clang-r510928.zip -o clang.zip &&
+    unzip -q clang.zip -d clang &&
+    rm -rf clang.zip
+    ClangPath="${MainClangPath}"
+    export PATH="${ClangPath}/bin:${PATH}"
+    cd ${ClangPath}
   else
-    echo "[!] Incorrect clang name. Check config.env for clang names."
-    exit 1
+    echo "[!] Clang already exists. Skipping..."
+    ClangPath="${MainClangPath}"
+    export PATH="${ClangPath}/bin:${PATH}"
   fi
-  if [ ! -f '${MainClangPath}-${ClangName}/bin/clang' ]; then
-    export KBUILD_COMPILER_STRING="$(${MainClangPath}-${ClangName}/bin/clang --version | head -n 1)"
+  if [ ! -f "${MainClangPath}/bin/clang" ]; then
+    export KBUILD_COMPILER_STRING="$(${MainClangPath}/bin/clang --version | head -n 1)"
   else
     export KBUILD_COMPILER_STRING="Unknown"
   fi
-}
-
-function updateclang() {
-  [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
-  if [ "${ClangName}" = "neutron" ] || [ "${ClangName}" = "" ]; then
-    echo "[!] Clang is set to neutron, checking for updates..."
-    cd clang-neutron
-    if [ "$(./antman -U | grep "Nothing to do")" = "" ];then
-      ./antman --patch=glibc
-    else
-      echo "[!] No updates have been found, skipping"
-    fi
-    cd ..
-    elif [ "${ClangName}" = "zyc" ]; then
-      echo "[!] Clang is set to zyc, checking for updates..."
-      cd clang-zyc
-      ZycLatest="$(curl -k https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-lastbuild.txt)"
-      if [ "$(cat README.md | grep "Build Date : " | cut -d: -f2 | sed "s/ //g")" != "${ZycLatest}" ];then
-        echo "[!] An update have been found, updating..."
-        sudo rm -rf ./*
-        wget -q $(curl -k https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt 2>/dev/null) -O "zyc-clang.tar.gz"
-        tar -xf zyc-clang.tar.gz
-        rm -f zyc-clang.tar.gz
-      else
-        echo "[!] No updates have been found, skipping..."
-      fi
-      cd ..
-    elif [ "${ClangName}" = "azure" ]; then
-      cd clang-azure
-      git fetch -q origin main
-      git pull origin main
-      cd ..
-    elif [ "${ClangName}" = "proton" ]; then
-      cd clang-proton
-      git fetch -q origin master
-      git pull origin master
-      cd ..
-  fi
-
 }
 
 # Enviromental variable
@@ -160,7 +56,7 @@ DEVICE_CODENAME="stone"
 BUILD_TIME="$(TZ="Asia/Shanghai" date "+%Y%m%d")"
 export DEVICE_DEFCONFIG="stone_defconfig"
 export ARCH="arm64"
-export KBUILD_BUILD_USER="wzyli"
+export KBUILD_BUILD_USER="AlexLiuDev233+cctv18"
 export KBUILD_BUILD_HOST="localhost"
 export KERNEL_NAME="XiaomiKernel"
 export SUBLEVEL="v5.4.$(cat "${MainPath}/Makefile" | grep "SUBLEVEL =" | sed 's/SUBLEVEL = *//g')"
@@ -173,13 +69,10 @@ BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 START=$(date +"%s")
 
 compile(){
-if [ "$ClangName" = "proton" ] || [ "$ClangName" = "greenforce" ]; then
-  sed -i 's/CONFIG_LLVM_POLLY=y/# CONFIG_LLVM_POLLY is not set/g' ${MainPath}/arch/$ARCH/configs/$DEVICE_DEFCONFIG || echo ""
-else
-  sed -i 's/# CONFIG_LLVM_POLLY is not set/CONFIG_LLVM_POLLY=y/g' ${MainPath}/arch/$ARCH/configs/$DEVICE_DEFCONFIG || echo ""
-fi
-make O=out ARCH=$ARCH $DEVICE_DEFCONFIG
-make -j"$CORES" ARCH=$ARCH O=out \
+sed -i 's/# CONFIG_LLVM_POLLY is not set/CONFIG_LLVM_POLLY=y/g' ${MainPath}/arch/$ARCH/configs/$DEVICE_DEFCONFIG || echo ""
+echo "CONFIG_LTO_NONE=y" >> ${MainPath}/arch/$ARCH/configs/$DEVICE_DEFCONFIG
+ARGS="O=out \
+    ARCH=$ARCH \
     CC=clang \
     LD=ld.lld \
     LLVM=1 \
@@ -191,7 +84,10 @@ make -j"$CORES" ARCH=$ARCH O=out \
     STRIP=llvm-strip \
     CLANG_TRIPLE=${CrossCompileFlagTriple} \
     CROSS_COMPILE=${CrossCompileFlag64} \
-    CROSS_COMPILE_ARM32=${CrossCompileFlag32} |& tee out/output.txt
+    CROSS_COMPILE_ARM32=${CrossCompileFlag32}"
+make $ARGS $DEVICE_DEFCONFIG
+make $ARGS olddefconfig
+make $ARGS -j"$CORES" |& tee out/output.txt
 
    if [[ -f "$IMAGE" ]]; then
       echo "Build Successful."
@@ -213,7 +109,6 @@ function cleanup() {
 }
 
 getclang
-updateclang
 compile
 END=$(date +"%s")
 DIFF=$(($END - $START))
