@@ -155,7 +155,7 @@ arch/arm/boot/dts/vendor
 Android.bp
 
 out
-clang-*
+clang*
 anykernel*
 
 # ignore patch fail
