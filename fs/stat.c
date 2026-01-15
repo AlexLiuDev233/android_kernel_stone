@@ -22,7 +22,14 @@
 #include <asm/unistd.h>
 
 #ifdef CONFIG_KSU_MANUAL_HOOK
-extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
+extern void ksu_handle_newfstat_ret(unsigned int *fd, struct stat __user **statbuf_ptr);
+#ifdef CONFIG_COMPAT
+extern void ksu_compat_newfstat_ret(unsigned int *fd, struct compat_stat __user **statbuf_ptr);
+#endif
+
+__attribute__((hot)) 
+extern int ksu_handle_stat(int *dfd, const char __user **filename_user,
+				int *flags);
 #endif
 
 /**
@@ -386,6 +393,9 @@ SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 	if (!error)
 		error = cp_new_stat(&stat, statbuf);
 
+#ifdef CONFIG_KSU_MANUAL_HOOK
+	ksu_handle_newfstat_ret(&fd, &statbuf);
+#endif
 	return error;
 }
 #endif
@@ -680,6 +690,10 @@ COMPAT_SYSCALL_DEFINE2(newfstat, unsigned int, fd,
 
 	if (!error)
 		error = cp_compat_stat(&stat, statbuf);
+
+#ifdef CONFIG_KSU_MANUAL_HOOK // 32-on-64
+	ksu_compat_newfstat_ret(&fd, &statbuf);
+#endif
 	return error;
 }
 #endif
