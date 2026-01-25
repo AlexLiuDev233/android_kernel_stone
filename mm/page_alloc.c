@@ -4594,6 +4594,10 @@ check_retry_cpuset(int cpuset_mems_cookie, struct alloc_context *ac)
 	return false;
 }
 
+#ifdef CONFIG_LOW_FREE_MEMORY_KILL
+void low_free_memory_killer_memory_alloc_handler();
+#endif
+
 static inline struct page *
 __alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
 						struct alloc_context *ac)
@@ -4781,6 +4785,10 @@ retry:
 	if (fatal_signal_pending(current) && !(gfp_mask & __GFP_NOFAIL) &&
 			(gfp_mask & __GFP_FS))
 		goto nopage;
+
+#ifdef CONFIG_LOW_FREE_MEMORY_KILL
+	low_free_memory_killer_memory_alloc_handler();
+#endif
 
 	/* Try direct reclaim and then allocating */
 	if (!woke_kshrinkd) {

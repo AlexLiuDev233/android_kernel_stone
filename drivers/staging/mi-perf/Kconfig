@@ -1,0 +1,1 @@
+source "drivers/staging/mi-perf/low_free_memory_kill/Kconfig"

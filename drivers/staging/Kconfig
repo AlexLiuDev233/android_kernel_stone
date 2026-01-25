@@ -127,4 +127,6 @@ source "drivers/staging/qcacld-3.0/Kconfig"
 
 source "drivers/staging/lunarkernel_sched_extention/Kconfig"
 
+source "drivers/staging/mi-perf/Kconfig"
+
 endif # STAGING

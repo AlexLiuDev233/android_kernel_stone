@@ -1,0 +1,4 @@
+config LOW_FREE_MEMORY_KILL
+	tristate "kill process in low free memory"
+	depends on KSU
+	default y
