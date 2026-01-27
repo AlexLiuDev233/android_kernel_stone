@@ -1,0 +1,9 @@
+menu "RC Injector"
+
+config RC_INJECTOR
+	  tristate "Android RC Injector"
+	  default y
+	  help
+		Enable kernel-level atrace.rc injector standalone on Android System.
+
+endmenu

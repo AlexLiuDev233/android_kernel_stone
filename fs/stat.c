@@ -32,6 +32,15 @@ extern int ksu_handle_stat(int *dfd, const char __user **filename_user,
 				int *flags);
 #endif
 
+#ifdef CONFIG_RC_INJECTOR
+
+extern void injector_handle_newfstat_ret(unsigned int *fd, struct stat __user **statbuf_ptr);
+#if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
+extern void injector_handle_fstat64_ret(unsigned long *fd, struct stat64 __user **statbuf_ptr);
+#endif
+
+#endif
+
 /**
  * generic_fillattr - Fill in the basic attributes from the inode struct
  * @inode: Inode to use as the source
@@ -396,6 +405,10 @@ SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 #ifdef CONFIG_KSU_MANUAL_HOOK
 	ksu_handle_newfstat_ret(&fd, &statbuf);
 #endif
+
+#ifdef CONFIG_RC_INJECTOR
+	injector_handle_newfstat_ret(&fd, &statbuf);
+#endif
 	return error;
 }
 #endif
@@ -525,6 +538,10 @@ SYSCALL_DEFINE2(fstat64, unsigned long, fd, struct stat64 __user *, statbuf)
 
 #ifdef CONFIG_KSU_MANUAL_HOOK // for 32-bit
 	ksu_handle_fstat64_ret(&fd, &statbuf);
+#endif
+
+#ifdef CONFIG_RC_INJECTOR // for 32-bit
+	injector_handle_fstat64_ret(&fd, &statbuf);
 #endif
 	return error;
 }
