@@ -21,11 +21,15 @@ static const char *binder_type[] = {
 
 static int netlink_unit = NETLINK_REKERNEL_MIN;
 
+static void netlink_rcv_msg(struct sk_buff* socket_buffer) {
+	/* DO NOTHING */
+}
 static struct sock* netlink_socket = NULL;
+static struct netlink_kernel_cfg rekernel_cfg = {
+	.input = netlink_rcv_msg, // set recv callback
+};
 static int start_rekernel_server(void)
 {
-	struct netlink_kernel_cfg rekernel_cfg = {};
-
 	if (netlink_socket)
 		return 0;
 
